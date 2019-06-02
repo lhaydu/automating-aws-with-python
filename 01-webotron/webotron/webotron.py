@@ -1,5 +1,8 @@
 import boto3
 import click
+from botocore.exceptions import ClientError
+import pathlib
+import mimetypes
 
 session = boto3.Session(profile_name='pythonAutomation')
 s3 = session.resource('s3')
@@ -26,6 +29,7 @@ def list_bucket_objects():
 @click.argument('bucket')
 def setup_bucket(bucket):
     "Create and configure S3 bucket"
+
     s3_bucket = None
     try:
         if session.region_name == 'us-east-1':
@@ -39,8 +43,6 @@ def setup_bucket(bucket):
         else:
             raise e
 
-    # s3_bucket.upload_file('index.html', 'index.html', ExtraArgs={'ContentType': 'text/html'})
-
     policy = """
     {
         "Version":"2012-10-17",
@@ -52,7 +54,8 @@ def setup_bucket(bucket):
             "Resource":["arn:aws:s3:::%s/*"]
         }]
      }
-     """ % s3_bucket.name
+    """ % s3_bucket.name
+    policy
     policy = policy.strip()
 
     pol = s3_bucket.Policy()
@@ -65,9 +68,38 @@ def setup_bucket(bucket):
         },
         'IndexDocument': {
             'Suffix': 'index.html'
-        },
-     })
-    #url = "http://%s.s3-website-us-east-1.amazonaws.com" % s3_bucket.name
+        }
+    })
+
+def upload_file(s3_bucket, path, key):
+    content_type = mimetypes.guess_type(key)[0] or 'text/plain'
+    s3_bucket.upload_file(
+        path,
+        key,
+        ExtraArgs={
+            'ContentType': content_type
+        }
+    )
+
+@cli.command('sync')
+@click.argument('pathname', type=click.Path(exists=True))
+@click.argument('bucket')
+def sync(pathname, bucket):
+
+    s3_bucket = s3.Bucket(bucket)
+    "Sync contents of PATHNAME to BUCKET"
+    root = pathlib.Path(pathname).expanduser().resolve()
+
+    def handle_directory(target):
+        for p in target.iterdir():
+             if p.is_dir():
+                 handle_directory(p)
+             if p.is_file():
+                 key = pathlib.PurePosixPath(p.relative_to(root))
+                 upload_file(s3_bucket, str(p), str(key))
+                 #upload_file(s3_bucket, str(p), str(p.relative_to(root)))
+
+    handle_directory(root)
 
 if  __name__ == '__main__':
     cli()

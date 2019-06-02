@@ -10,3 +10,4 @@ Webotron current had the following features:
 - List buckets
 - List contents of a bucket
 - Create and set up a bucket
+- Sync directory tree to bucket 
