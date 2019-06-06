@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Webotron: Deploy websites with AWS.
-
 Webotron automates the process of deploying static websites to AWS.
 - Configure AWS S3 list_buckets
   - Create them
@@ -17,13 +16,21 @@ import click
 
 from bucket import BucketManager
 
-session = boto3.Session(profile_name='pythonAutomation')
-bucket_manager = BucketManager(session)
+session = None
+bucket_manager = None
 
 
 @click.group()
-def cli():
+@click.option('--profile', default=None,
+    help="Use a given AWS profile.")
+def cli(profile):
     """Webotron deploys websites to AWS."""
+    global session, bucket_manager
+    session_cfg = {}
+    if profile:
+        session_cfg['profile_name'] = profile
+    session = boto3.Session(**session_cfg)
+    bucket_manager = BucketManager(session)
 
 
 @cli.command('list-buckets')
