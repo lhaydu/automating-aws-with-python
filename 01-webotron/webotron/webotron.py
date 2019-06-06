@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Webotron: Deploy websites with AWS.
+
 Webotron automates the process of deploying static websites to AWS.
 - Configure AWS S3 list_buckets
   - Create them
@@ -22,13 +23,15 @@ bucket_manager = None
 
 @click.group()
 @click.option('--profile', default=None,
-    help="Use a given AWS profile.")
+              help="Use a given AWS profile.")
 def cli(profile):
     """Webotron deploys websites to AWS."""
     global session, bucket_manager
+
     session_cfg = {}
     if profile:
         session_cfg['profile_name'] = profile
+
     session = boto3.Session(**session_cfg)
     bucket_manager = BucketManager(session)
 
@@ -55,7 +58,6 @@ def setup_bucket(bucket):
     s3_bucket = bucket_manager.init_bucket(bucket)
     bucket_manager.set_policy(s3_bucket)
     bucket_manager.configure_website(s3_bucket)
-    return
 
 
 @cli.command('sync')
@@ -64,6 +66,7 @@ def setup_bucket(bucket):
 def sync(pathname, bucket):
     """Sync contents of PATHNAME to BUCKET."""
     bucket_manager.sync(pathname, bucket)
+    print(bucket_manager.get_bucket_url(bucket_manager.s3.Bucket(bucket)))
 
 
 if __name__ == '__main__':

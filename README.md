@@ -12,3 +12,4 @@ Webotron currently has the following features:
 - Create and set up a bucket
 - Sync directory tree to bucket
 - Set AWS profile with --profile=<profilename>
+- Output bucket name from sync command
