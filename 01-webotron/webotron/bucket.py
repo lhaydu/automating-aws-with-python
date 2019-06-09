@@ -2,15 +2,16 @@
 
 """Classes for S3 buckets."""
 
+from functools import reduce
+from hashlib import md5
 import mimetypes
 import pathlib
-import boto3
-from functools import reduce
 
 from botocore.exceptions import ClientError
-from hashlib import md5
 
+import boto3
 import util
+
 
 class BucketManager:
     """Manage an S3 Bucket."""
@@ -27,6 +28,10 @@ class BucketManager:
         )
 
         self.manifest = {}
+
+    def get_bucket(self, bucket_name):
+        """Get bucket object given bucket name."""
+        return self.s3.Bucket(bucket_name)
 
     def get_region_name(self, bucket):
         """Get the bucket's region name."""
@@ -66,7 +71,8 @@ class BucketManager:
 
         return s3_bucket
 
-    def set_policy(self, bucket):
+    @staticmethod
+    def set_policy(bucket):
         """Set bucket policy to be readable by everyone."""
         policy = """
         {
@@ -85,7 +91,8 @@ class BucketManager:
         pol = bucket.Policy()
         pol.put(Policy=policy)
 
-    def configure_website(self, bucket):
+    @staticmethod
+    def configure_website(bucket):
         """Configure bucket to be a website."""
         bucket.Website().put(WebsiteConfiguration={
             'ErrorDocument': {
@@ -96,7 +103,7 @@ class BucketManager:
             }
         })
 
-    def load_manifest(self,bucket):
+    def load_manifest(self, bucket):
         """Load manifest for caching purposes."""
         paginator = self.s3.meta.client.get_paginator('list_objects_v2')
         for page in paginator.paginate(Bucket=bucket.name):
@@ -110,16 +117,12 @@ class BucketManager:
         hash = md5()
         hash.update(data)
 
-        return  hash
-
+        return hash
 
     def gen_etag(self, path):
         """Generate etag for file."""
-        #print("Entering gen_etag")
-        #print(path)
         hashes = []
 
-        #print("still in gen_etag")
         with open(path, 'rb') as f:
             while True:
                 data = f.read(self.CHUNK_SIZE)
@@ -128,15 +131,14 @@ class BucketManager:
                     break
 
                 hashes.append(self.hash_data(data))
-        #print("Returning from gen_etag")
-        if not hashes:
-            return
-        elif len(hashes) == 1:
-            return  '"{}"'.format(hashes[0].hexdigest())
-        else:
-            hash = self.hash_data(reduce(lambda x, y: x + y, (h.digest() for h in hashes )))
-            return  '"{}-{}"'.format(hash.hexdigest(), len(hashes))
 
+        if not hashes:
+            return ""
+        elif len(hashes) == 1:
+            return '"{}"'.format(hashes[0].hexdigest())
+        else:
+            hash = self.hash_data(reduce(lambda x, y: x + y, (h.digest() for h in hashes)))
+            return '"{}-{}"'.format(hash.hexdigest(), len(hashes))
 
     def upload_file(self, bucket, path, key):
         """Upload file to S3 bucket given a path and key."""
@@ -161,7 +163,6 @@ class BucketManager:
         bucket = self.s3.Bucket(bucket_name)
         self.load_manifest(bucket)
         root = pathlib.Path(pathname).expanduser().resolve()
-        print(root)
 
         def handle_directory(target):
             for path in target.iterdir():
