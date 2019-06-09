@@ -7,9 +7,9 @@ Webotron automates the process of deploying static websites to AWS.
 - Configure AWS S3 list_buckets
   - Create them
   - Set them up for static website hosting
-  - Deploy local files to theme
-  - Configure DNS with AWS Route 53
- - Configure a Content Delivery Network (CDN) and SSL with AWS CloudFront
+  - Deploy local files to them
+- Configure DNS with AWS Route 53
+- Configure a Content Delivery Network (CDN) and SSL with AWS CloudFront
 """
 
 import boto3
