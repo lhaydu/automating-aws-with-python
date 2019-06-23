@@ -2,7 +2,7 @@
 
 """Classes for Route 53 domains."""
 
-#from pprint import pprint
+
 import uuid
 
 
@@ -48,6 +48,29 @@ class DomainManager:
                             'AliasTarget': {
                                 'HostedZoneId': endpoint.zone,
                                 'DNSName': endpoint.host,
+                                'EvaluateTargetHealth': False
+                            }
+                        }
+                    }
+                ]
+            }
+        )
+
+    def create_cf_domain_record(self, zone, domain_name, cfdomain_name):
+        """Create a domain record in zone for domain_name."""
+        return self.client.change_resource_record_sets(
+            HostedZoneId=zone['Id'],
+            ChangeBatch={
+                'Comment': 'Created by webotron',
+                'Changes': [
+                    {
+                        'Action': 'UPSERT',
+                        'ResourceRecordSet': {
+                            'Name': domain_name,
+                            'Type': 'A',
+                            'AliasTarget': {
+                                'HostedZoneId': 'Z2FDTNDATAQYW2',
+                                'DNSName': cfdomain_name,
                                 'EvaluateTargetHealth': False
                             }
                         }

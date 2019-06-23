@@ -13,3 +13,5 @@ Webotron currently has the following features:
 - Sync directory tree to bucket
 - Set AWS profile with --profile=<profilename>
 - Output bucket name from sync command
+- Set Up Domain
+- Publish to CDN with CloudFront and SSL Support

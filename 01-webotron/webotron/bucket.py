@@ -15,7 +15,7 @@ import util
 
 class BucketManager:
     """Manage an S3 Bucket."""
-
+    
     CHUNK_SIZE = 8388608
 
     def __init__(self, session):
@@ -59,9 +59,10 @@ class BucketManager:
             if self.session.region_name == 'us-east-1':
                 s3_bucket = self.s3.create_bucket(Bucket=bucket_name)
             else:
+                print("Creating bucket: %s" % (bucket_name))
                 s3_bucket = self.s3.create_bucket(
-                    Bucket='bucket',
-                    CreateBucketConfiguration={'Location_Constraint': self.session.region_name})
+                    Bucket=bucket_name,
+                    CreateBucketConfiguration={'LocationConstraint': self.session.region_name})
 
         except ClientError as error:
             if error.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
@@ -145,7 +146,10 @@ class BucketManager:
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
 
         etag = self.gen_etag(path)
-        if self.manifest.get(key, '') == etag:
+        # handle zero-byte file
+        if etag == "":
+            pass
+        elif self.manifest.get(key, '') == etag:
             print("Skipping {}, etags match".format(key))
             return
 
