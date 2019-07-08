@@ -15,3 +15,13 @@ Webotron currently has the following features:
 - Output bucket name from sync command
 - Set Up Domain
 - Publish to CDN with CloudFront and SSL Support
+
+
+## 02-notifon
+
+Notifon is a project to notify Slack users of changes to your AWS account using
+CloudWatch Events
+
+### features
+
+Notifon currently has the following features:
