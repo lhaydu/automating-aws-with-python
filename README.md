@@ -22,6 +22,14 @@ Webotron currently has the following features:
 Notifon is a project to notify Slack users of changes to your AWS account using
 CloudWatch Events
 
-### features
+### Features
 
 Notifon currently has the following features:
+
+
+
+#### Notes
+Serverless framework - uses CloudFormation to automate deployment and config
+of servlerless, such as Lambda.
+>>> sls create -t aws-ptyhon3 -n notifon-notifier
+>>> serverless create --template aws-python3 --name notifon-notifier
