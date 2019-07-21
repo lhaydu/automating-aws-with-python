@@ -1,0 +1,7 @@
+{
+  "videolyzer":{
+    "profile": "pythonAutomation",
+    "videos_bucket": "lahvideolyzervideos123456",
+    "videos_table": ""
+  }
+}
