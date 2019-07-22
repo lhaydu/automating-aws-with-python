@@ -36,7 +36,7 @@ provider:
           - Arn
 
   environment:
-    DYNAMODB_DB_TABLE_NAME: ${self:custom.videosTableName}
+    DYNAMODB_TABLE_NAME: ${self:custom.videosTableName}
     REKOGNITION_SNS_TOPIC_ARN: ${self:custom.rekognitionSNSTopicArn}
     REKOGNITION_ROLE_ARN:
       Fn::GetAtt:
